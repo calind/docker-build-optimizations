@@ -31,6 +31,23 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
 
+
+      - name: Cache
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: root-npm-cache
+          key: root-npm-cache-${{ hashFiles('Dockerfile') }}
+
+      - name: Inject cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.2
+        with:
+          cache-map: |
+            {
+              "root-npm-cache": "/root/.npm"
+            }
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
+
       - name: Build
         uses: docker/build-push-action@v6
         with:
